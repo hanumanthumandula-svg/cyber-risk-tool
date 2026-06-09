@@ -28,8 +28,9 @@ function Report() {
 
   const saveReport = async () => {
     try {
-      const overall = Object.values(answers).reduce((sum, v) => sum + v.score, 0) / Object.values(answers).length;
-   await axios.post('https://cyber-risk-backend-6e6r.onrender.com/api/assessment/save',
+      const values = Object.values(answers);
+      const overall = values.reduce((sum, v) => sum + v.score, 0) / values.length;
+      await axios.post('https://cyber-risk-backend-6e6r.onrender.com/api/assessment/save', {
         assets,
         answers,
         overallScore: Math.round((overall / 10) * 100),
@@ -45,14 +46,14 @@ function Report() {
   return (
     <div className="page-container">
       <div className="page-header">
-        <h2>Step 4 — Risk Report & Recommendations</h2>
+        <h2>Step 4 - Risk Report & Recommendations</h2>
         <p>Detailed remediation plan based on your assessment</p>
       </div>
       <div className="report-section">
         {Object.entries(answers).map(([key, val]) => (
           <div key={key} className={`report-card ${val.score >= 7 ? 'low' : val.score >= 4 ? 'medium' : 'high'}`}>
             <div className="report-card-header">
-              <h3>{recommendations[key]?.title}</h3>
+              <h3>{recommendations[key] && recommendations[key].title}</h3>
               <span className={`risk-tag ${val.score >= 7 ? 'low' : val.score >= 4 ? 'medium' : 'high'}`}>
                 {val.score >= 7 ? 'Low Risk' : val.score >= 4 ? 'Medium Risk' : 'High Risk'}
               </span>
@@ -61,7 +62,7 @@ function Report() {
             <div className="tips">
               <strong>Recommended Actions:</strong>
               <ul>
-                {recommendations[key]?.tips.map((tip, i) => (
+                {recommendations[key] && recommendations[key].tips.map((tip, i) => (
                   <li key={i}>{tip}</li>
                 ))}
               </ul>
@@ -70,9 +71,9 @@ function Report() {
         ))}
       </div>
       <div className="button-row">
-        <button className="btn-secondary" onClick={() => navigate('/riskscore')}>← Back</button>
+        <button className="btn-secondary" onClick={() => navigate('/riskscore')}>Back</button>
         <button className="btn-primary" onClick={saveReport} disabled={saved}>
-          {saved ? '✓ Report Saved' : 'Save Report to Database'}
+          {saved ? 'Report Saved' : 'Save Report to Database'}
         </button>
         <button className="btn-secondary" onClick={() => { localStorage.clear(); navigate('/'); }}>
           Start New Assessment
