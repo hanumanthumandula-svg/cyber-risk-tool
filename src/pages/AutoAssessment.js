@@ -19,13 +19,44 @@ const AutoAssessment = () => {
     setHistory(saved);
   }, []);
 
+  const validateInput = (input) => {
+    const trimmed = input.replace(/^https?:\/\//, '').replace(/\/.*$/, '').trim();
+    const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
+    const domainRegex = /^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
+    if (ipv4Regex.test(trimmed)) {
+      const parts = trimmed.split('.').map(Number);
+      if (parts.some(n => n > 255)) return { valid: false, message: 'Invalid IP address' };
+      const isPrivate =
+        parts[0] === 10 ||
+        parts[0] === 127 ||
+        parts[0] === 0 ||
+        (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) ||
+        (parts[0] === 192 && parts[1] === 168) ||
+        (parts[0] === 169 && parts[1] === 254);
+      if (isPrivate) return { valid: false, message: 'Private/internal IP addresses cannot be scanned' };
+      return { valid: true, type: 'ip' };
+    }
+    if (domainRegex.test(trimmed)) return { valid: true, type: 'domain' };
+    return { valid: false, message: 'Please enter a valid domain (e.g. example.com) or IP address (e.g. 8.8.8.8)' };
+  };
+
   const runScan = async () => {
-    if (!domain.trim()) { alert('Please enter a domain.'); return; }
+    if (!domain.trim()) { alert('Please enter a domain or IP address.'); return; }
+
+    const validation = validateInput(domain);
+    if (!validation.valid) { alert(validation.message); return; }
+
     setScanning(true);
     setScanResult(null);
     setAiResult(null);
 
-    const msgs = ['Resolving DNS...', 'Checking SSL certificate...', 'Scanning ports...', 'Analyzing HTTP headers...', 'Calculating risk score...'];
+    const msgs = [
+      validation.type === 'ip' ? 'Resolving IP...' : 'Resolving DNS...',
+      'Checking SSL certificate...',
+      'Scanning ports...',
+      'Analyzing HTTP headers...',
+      'Calculating risk score...'
+    ];
     let mi = 0;
     setScanMsg(msgs[0]);
     const ticker = setInterval(() => { mi = (mi + 1) % msgs.length; setScanMsg(msgs[mi]); }, 2000);
@@ -38,9 +69,16 @@ const AutoAssessment = () => {
       });
       const data = await res.json();
       clearInterval(ticker);
+
+      if (!res.ok) {
+        alert(data.error || 'Scan failed. Please try again.');
+        setScanning(false);
+        return;
+      }
+
       setScanResult(data);
 
-      const newHistory = [{ domain, riskLevel: data.riskLevel, score: data.score, date: new Date().toLocaleString() }, ...history].slice(0, 5);
+      const newHistory = [{ domain, riskLevel: data.riskLevel, score: data.score, date: new Date().toLocaleString(), targetType: data.targetType }, ...history].slice(0, 5);
       setHistory(newHistory);
       localStorage.setItem('scanHistory', JSON.stringify(newHistory));
 
@@ -54,9 +92,10 @@ const AutoAssessment = () => {
 
   const runAIAnalysis = async (scanData) => {
     setAiLoading(true);
-    const prompt = `You are a senior cybersecurity analyst. Analyze these real scan results for ${scanData.domain} and return ONLY valid JSON (no markdown):
+    const targetLabel = scanData.targetType === 'ip' ? `IP Address: ${scanData.domain}` : `Domain: ${scanData.domain}`;
+    const prompt = `You are a senior cybersecurity analyst. Analyze these real scan results for ${targetLabel} and return ONLY valid JSON (no markdown):
 
-Domain: ${scanData.domain}
+${targetLabel}
 Risk Score: ${scanData.score}/100
 Risk Level: ${scanData.riskLevel}
 SSL: ${JSON.stringify(scanData.ssl)}
@@ -112,7 +151,7 @@ Return this exact JSON:
 
   const copyReport = () => {
     if (!scanResult || !aiResult) return;
-    const text = `SECURITY SCAN REPORT\n${'='.repeat(40)}\nDomain: ${scanResult.domain}\nDate: ${scanResult.scannedAt}\nRisk Score: ${scanResult.score}/100\nRisk Level: ${scanResult.riskLevel}\n\nSUMMARY\n${aiResult.executiveSummary}\n\nRECOMMENDATIONS\n${(aiResult.recommendations || []).map((r, i) => `${i + 1}. ${r}`).join('\n')}`;
+    const text = `SECURITY SCAN REPORT\n${'='.repeat(40)}\nTarget: ${scanResult.domain} (${scanResult.targetType === 'ip' ? 'IP Address' : 'Domain'})\nDate: ${scanResult.scannedAt}\nRisk Score: ${scanResult.score}/100\nRisk Level: ${scanResult.riskLevel}\n\nSUMMARY\n${aiResult.executiveSummary}\n\nRECOMMENDATIONS\n${(aiResult.recommendations || []).map((r, i) => `${i + 1}. ${r}`).join('\n')}`;
     navigator.clipboard.writeText(text).then(() => alert('Report copied!'));
   };
 
@@ -122,14 +161,14 @@ Return this exact JSON:
     <div className="page-container">
       <div className="page-header">
         <h2>🔍 Automated Security Scanner</h2>
-        <p>Enter any public domain to run a real-time security scan</p>
+        <p>Enter any public domain or IP address to run a real-time security scan</p>
       </div>
 
       {/* Scan Input */}
       <div className="report-card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
-        <label style={{ fontSize: '13px', color: '#888', display: 'block', marginBottom: '6px' }}>Domain to scan</label>
+        <label style={{ fontSize: '13px', color: '#888', display: 'block', marginBottom: '6px' }}>Domain or IP address to scan</label>
         <div style={{ display: 'flex', gap: '10px' }}>
-          <input className="form-input" type="text" placeholder="e.g. example.com"
+          <input className="form-input" type="text" placeholder="e.g. example.com or 8.8.8.8"
             value={domain} onChange={e => setDomain(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && runScan()}
             style={{ flex: 1 }} />
@@ -144,7 +183,7 @@ Return this exact JSON:
           </div>
         )}
         <div style={{ fontSize: '12px', color: '#888', marginTop: '8px' }}>
-          ✅ Works on any public website &nbsp;|&nbsp; ✅ Legal security assessment &nbsp;|&nbsp; ✅ No installation needed
+          ✅ Domains &amp; IP addresses supported &nbsp;|&nbsp; ✅ Legal security assessment &nbsp;|&nbsp; ✅ No installation needed
         </div>
       </div>
 
@@ -155,7 +194,12 @@ Return this exact JSON:
           <div className="report-card" style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
               <div>
-                <div style={{ fontSize: '13px', color: '#888', marginBottom: '4px' }}>Security score for {scanResult.domain}</div>
+                <div style={{ fontSize: '13px', color: '#888', marginBottom: '4px' }}>
+                  Security score for {scanResult.domain}
+                  {scanResult.targetType === 'ip' && (
+                    <span style={{ marginLeft: '8px', background: 'rgba(99,102,241,0.15)', color: '#6366f1', fontSize: '11px', padding: '2px 8px', borderRadius: '4px' }}>IP Address</span>
+                  )}
+                </div>
                 <div style={{ fontSize: '56px', fontWeight: 600, color: getRiskColor(scanResult.riskLevel), lineHeight: 1 }}>{scanResult.score}</div>
                 <div style={{ fontSize: '13px', color: '#888' }}>out of 100</div>
               </div>
@@ -199,7 +243,13 @@ Return this exact JSON:
                   { label: 'SSL Certificate', value: scanResult.ssl?.valid ? (scanResult.ssl.expired ? '❌ Expired' : `✅ Valid (${scanResult.ssl.daysLeft}d left)`) : '❌ Invalid', color: scanResult.ssl?.valid && !scanResult.ssl?.expired ? '#22c55e' : '#ef4444' },
                   { label: 'HTTPS Redirect', value: scanResult.headers?.httpsRedirect ? '✅ Enabled' : '❌ Missing', color: scanResult.headers?.httpsRedirect ? '#22c55e' : '#ef4444' },
                   { label: 'Open Ports', value: `${scanResult.ports?.open?.length || 0} open`, color: (scanResult.ports?.open?.length || 0) > 3 ? '#ef4444' : '#f59e0b' },
-                  { label: 'DNS Resolved', value: scanResult.dns?.resolved ? `✅ ${scanResult.dns.ips?.[0]}` : '❌ Failed', color: scanResult.dns?.resolved ? '#22c55e' : '#ef4444' },
+                  {
+                    label: scanResult.targetType === 'ip' ? 'IP Info' : 'DNS Resolved',
+                    value: scanResult.targetType === 'ip'
+                      ? (scanResult.dns?.hostname ? `✅ ${scanResult.dns.hostname}` : `✅ ${scanResult.domain}`)
+                      : (scanResult.dns?.resolved ? `✅ ${scanResult.dns.ips?.[0]}` : '❌ Failed'),
+                    color: scanResult.dns?.resolved ? '#22c55e' : '#ef4444'
+                  },
                   { label: 'SSL Issuer', value: scanResult.ssl?.issuer || 'N/A', color: '#888' },
                   { label: 'HTTP Status', value: scanResult.headers?.statusCode || 'N/A', color: '#888' }
                 ].map((item, i) => (
@@ -315,7 +365,12 @@ Return this exact JSON:
             <div key={i} onClick={() => setDomain(item.domain)}
               style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '0.5px solid #333', cursor: 'pointer', fontSize: '13px' }}>
               <div>
-                <div style={{ fontWeight: 500 }}>{item.domain}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ fontWeight: 500 }}>{item.domain}</span>
+                  {item.targetType === 'ip' && (
+                    <span style={{ background: 'rgba(99,102,241,0.15)', color: '#6366f1', fontSize: '10px', padding: '1px 6px', borderRadius: '3px' }}>IP</span>
+                  )}
+                </div>
                 <div style={{ fontSize: '12px', color: '#888' }}>{item.date}</div>
               </div>
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
