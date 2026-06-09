@@ -1,1 +1,44 @@
-a
+.ai-input-card { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 2rem; margin-bottom: 2rem; }
+.ai-input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+.ai-input-group label { display: block; font-size: 0.85rem; color: #94a3b8; margin-bottom: 0.5rem; }
+.ai-input { width: 100%; background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 0.75rem 1rem; color: #e2e8f0; font-size: 1rem; }
+.ai-input:focus { outline: none; border-color: #6366f1; }
+.ai-generate-btn { width: 100%; padding: 1rem; font-size: 1.1rem; }
+.ai-error { color: #ef4444; font-size: 0.9rem; margin-bottom: 1rem; }
+.ai-loading { text-align: center; padding: 3rem; }
+.ai-loading-spinner { width: 48px; height: 48px; border: 4px solid #334155; border-top-color: #6366f1; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.ai-loading p { color: #94a3b8; margin: 0.5rem 0; }
+.ai-loading-sub { font-size: 0.85rem; color: #64748b; }
+.ai-report { display: flex; flex-direction: column; gap: 1.5rem; }
+.ai-report-header { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+.ai-report-header h3 { font-size: 1.4rem; color: #f1f5f9; }
+.ai-report-header p { color: #94a3b8; margin-top: 0.25rem; }
+.ai-score-box { border: 3px solid; border-radius: 12px; padding: 1rem 1.5rem; text-align: center; min-width: 120px; }
+.ai-score-num { font-size: 2.5rem; font-weight: 800; }
+.ai-score-label { color: #94a3b8; font-size: 0.85rem; }
+.ai-risk-badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 99px; color: white; font-size: 0.85rem; font-weight: 600; margin-top: 0.5rem; }
+.ai-section { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 1.5rem; }
+.ai-section h4 { color: #f1f5f9; font-size: 1.1rem; margin-bottom: 1rem; }
+.ai-section p { color: #94a3b8; line-height: 1.7; }
+.ai-threats { display: flex; flex-direction: column; gap: 0.75rem; }
+.ai-threat-card { background: #0f172a; border-radius: 8px; padding: 0.75rem 1rem; }
+.ai-threat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem; }
+.ai-threat-name { font-size: 0.95rem; font-weight: 500; color: #e2e8f0; }
+.ai-severity-badge { font-size: 0.75rem; padding: 2px 8px; border-radius: 99px; font-weight: 600; }
+.ai-threat-desc { color: #64748b; font-size: 0.85rem; }
+.ai-domains { display: flex; flex-direction: column; gap: 0.75rem; }
+.ai-domain-row { display: grid; grid-template-columns: 160px 1fr 50px; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+.ai-domain-name { font-size: 0.85rem; color: #e2e8f0; }
+.ai-domain-bar-wrap { background: #0f172a; border-radius: 99px; height: 8px; }
+.ai-domain-bar { height: 8px; border-radius: 99px; transition: width 0.5s; }
+.ai-domain-score { font-size: 0.85rem; color: #94a3b8; text-align: right; }
+.ai-domain-rec { grid-column: 1 / -1; font-size: 0.8rem; color: #64748b; padding-left: 0; }
+.ai-compliance { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.ai-compliance-card { background: #0f172a; border-radius: 8px; padding: 0.75rem 1rem; }
+.ai-compliance-top { display: flex; justify-content: space-between; margin-bottom: 0.35rem; }
+.ai-compliance-name { font-size: 0.9rem; font-weight: 500; color: #e2e8f0; }
+.ai-compliance-status { font-size: 0.85rem; font-weight: 600; }
+.ai-compliance-gap { color: #64748b; font-size: 0.8rem; }
+.ai-recommendations { color: #94a3b8; padding-left: 1.5rem; }
+.ai-recommendations li { margin-bottom: 0.5rem; line-height: 1.6; font-size: 0.95rem; }
