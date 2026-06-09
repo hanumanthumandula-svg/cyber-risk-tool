@@ -11,7 +11,6 @@ function Header() {
         </div>
         <nav className="nav">
           <Link to="/">Home</Link>
-          <Link to="/assets">New Assessment</Link>
           <Link to="/auto-assessment">AI Assessment</Link>
         </nav>
       </div>

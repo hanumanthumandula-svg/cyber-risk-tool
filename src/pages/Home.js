@@ -8,42 +8,41 @@ function Home() {
     <div className="home-container">
       <div className="hero">
         <h1>Cybersecurity Risk Assessment Tool</h1>
-        <p>Identify, assess, and manage cybersecurity risks in your organization with our comprehensive risk assessment framework.</p>
-        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button className="btn-primary" onClick={() => navigate('/assets')}>
-            Start Assessment →
-          </button>
-          <button className="btn-primary" onClick={() => navigate('/auto-assessment')}
-            style={{ background: 'linear-gradient(135deg, #6366f1, #534AB7)', border: 'none' }}>
-            ⚡ AI Auto Assessment
-          </button>
-        </div>
+        <p>Instantly assess cybersecurity risks for any asset using AI. Get threat analysis, compliance mapping, and actionable recommendations in seconds.</p>
+        <button className="btn-primary" onClick={() => navigate('/auto-assessment')}>
+          ⚡ Start AI Assessment →
+        </button>
       </div>
       <div className="features">
         <div className="feature-card">
-          <span>🔍</span>
-          <h3>Asset Identification</h3>
-          <p>Identify all IT assets in your organization</p>
+          <span>🤖</span>
+          <h3>AI-Powered Analysis</h3>
+          <p>Claude AI analyzes your asset and generates instant risk insights</p>
         </div>
         <div className="feature-card">
           <span>📊</span>
           <h3>Risk Scoring</h3>
-          <p>Get detailed risk scores across 8 control domains</p>
+          <p>Inherent and residual risk scores with 5×5 heat map</p>
+        </div>
+        <div className="feature-card">
+          <span>🗺️</span>
+          <h3>Compliance Mapping</h3>
+          <p>Mapped to ISO 27001, NIST CSF, IRDAI, PCI DSS and more</p>
         </div>
         <div className="feature-card">
           <span>📋</span>
-          <h3>Risk Report</h3>
-          <p>Generate comprehensive remediation reports</p>
+          <h3>Treatment Plan</h3>
+          <p>Avoid, Mitigate, Transfer or Accept — full 4-option plan</p>
         </div>
         <div className="feature-card">
-          <span>🛡️</span>
-          <h3>Recommendations</h3>
-          <p>Get actionable security recommendations</p>
+          <span>⚠️</span>
+          <h3>Threat Identification</h3>
+          <p>5 key threats identified with severity ratings</p>
         </div>
         <div className="feature-card">
-          <span>⚡</span>
-          <h3>AI Auto Assessment</h3>
-          <p>Get instant AI-powered risk analysis with compliance mapping</p>
+          <span>⬇️</span>
+          <h3>Export Reports</h3>
+          <p>Download JSON, copy to clipboard or print as PDF</p>
         </div>
       </div>
     </div>
