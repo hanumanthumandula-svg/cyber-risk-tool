@@ -29,7 +29,7 @@ function Report() {
   const saveReport = async () => {
     try {
       const overall = Object.values(answers).reduce((sum, v) => sum + v.score, 0) / Object.values(answers).length;
-    await axios.post('https://cyber-risk-backend-6e6r.onrender.com/api/assessment/save', {
+   await axios.post('https://cyber-risk-backend-6e6r.onrender.com/api/assessment/save',
         assets,
         answers,
         overallScore: Math.round((overall / 10) * 100),
