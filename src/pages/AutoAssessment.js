@@ -93,7 +93,7 @@ const AutoAssessment = () => {
   const runAIAnalysis = async (scanData) => {
     setAiLoading(true);
     const targetLabel = scanData.targetType === 'ip' ? `IP Address: ${scanData.domain}` : `Domain: ${scanData.domain}`;
-    const prompt = `You are a senior cybersecurity analyst. Analyze these real scan results for ${targetLabel} and return ONLY valid JSON (no markdown):
+    const prompt = `You are a senior cybersecurity analyst. Analyze these real scan results for ${targetLabel} and return ONLY valid JSON (no markdown, no explanation, no backticks):
 
 ${targetLabel}
 Risk Score: ${scanData.score}/100
@@ -104,7 +104,7 @@ Security Headers: ${JSON.stringify(scanData.headers)}
 DNS: ${JSON.stringify(scanData.dns)}
 Findings: ${JSON.stringify(scanData.findings)}
 
-Return this exact JSON:
+Return this exact JSON structure and nothing else:
 {
   "executiveSummary": "3 sentence summary of the security posture",
   "threats": [{"name": "threat", "severity": "Critical|High|Medium|Low", "description": "description"}],
@@ -125,10 +125,22 @@ Return this exact JSON:
       });
       const data = await res.json();
       const raw = data.content.map(b => b.text || '').join('');
-      const clean = raw.replace(/```json|```/g, '').trim();
+
+      // Robust JSON extraction
+      const jsonMatch = raw.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('No JSON found in response');
+      const clean = jsonMatch[0].trim();
       setAiResult(JSON.parse(clean));
+
     } catch (e) {
-      console.error('AI analysis failed', e);
+      console.error('AI analysis failed:', e);
+      setAiResult({
+        executiveSummary: 'AI analysis could not be completed for this scan. Please review the findings manually.',
+        threats: [],
+        recommendations: ['Review the scan findings listed above manually.'],
+        complianceNotes: '',
+        overallVerdict: 'Manual review recommended.'
+      });
     }
     setAiLoading(false);
   };
