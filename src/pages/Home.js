@@ -12,6 +12,11 @@ function Home() {
           ⚡ Start AI Assessment →
         </button>
       </div>
+      <div className="feature-card" onClick={() => navigate('/history')} style={{ cursor: 'pointer' }}>
+  <div className="feature-icon">📈</div>
+  <h3>Risk Score History</h3>
+  <p>View trends and history of all past scans</p>
+</div>
       <div className="features">
         <div className="feature-card"><span>🤖</span><h3>AI Powered</h3><p>Groq AI analyzes and generates full report instantly</p></div>
         <div className="feature-card"><span>📊</span><h3>Risk Scoring</h3><p>Overall score with 8 domain breakdown</p></div>
