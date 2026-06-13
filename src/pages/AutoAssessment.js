@@ -106,33 +106,34 @@ const AutoAssessment = () => {
     setEmailStatus('');
 
     const msgs = [
-      validation.type === 'ip' ? 'Resolving IP...' : 'Resolving DNS...',
-      'Checking SSL certificate...', 'Scanning ports...',
-      'Analyzing HTTP headers...', 'Calculating risk score...'
-    ];
+  '🔍 Waking up scanner...',
+  validation.type === 'ip' ? '📡 Resolving IP address...' : '🌐 Resolving DNS records...',
+  '🔒 Checking SSL certificate...',
+  '🚪 Scanning open ports...',
+  '🛡️ Analyzing HTTP security headers...',
+  '📊 Calculating risk score...',
+  '🤖 Running AI analysis...'
+];
     let mi = 0;
-    setScanMsg(msgs[0]);
-    const ticker = setInterval(() => { mi = (mi + 1) % msgs.length; setScanMsg(msgs[mi]); }, 2000);
-
-    try {
-      const res = await fetch(`${API}/api/scan`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ domain })
-      });
-      const data = await res.json();
-      clearInterval(ticker);
-      if (!res.ok) { alert(data.error || 'Scan failed.'); setScanning(false); return; }
-
-      setScanResult(data);
-
-      const newHistory = [{
-        domain, riskLevel: data.riskLevel, score: data.score,
-        date: new Date().toLocaleString(), targetType: data.targetType
-      }, ...history].slice(0, 5);
-      setHistory(newHistory);
-      localStorage.setItem('scanHistory', JSON.stringify(newHistory));
-
+   {scanning && (
+  <div style={{ marginTop: '12px' }}>
+    <div style={{ fontSize: '13px', color: '#6366f1', marginBottom: '6px' }}>
+      {scanMsg}
+    </div>
+    <div style={{ background: '#1e293b', borderRadius: '99px', height: '4px', overflow: 'hidden' }}>
+      <div style={{
+        height: '100%',
+        width: '100%',
+        background: 'linear-gradient(90deg, #6366f1, #4f46e5)',
+        borderRadius: '99px',
+        animation: 'pulse 1.5s ease-in-out infinite'
+      }}/>
+    </div>
+    <div style={{ fontSize: '12px', color: '#888', marginTop: '6px' }}>
+      First scan may take 30-60 seconds if server is waking up. Subsequent scans are faster.
+    </div>
+  </div>
+)}
       // ── Show one-time alert for Medium/High/Critical ──────────────────
       showRiskAlert(data);
 
