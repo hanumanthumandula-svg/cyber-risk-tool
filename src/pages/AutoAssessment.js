@@ -221,6 +221,24 @@ Return this exact JSON:
         threats: [], recommendations: ['Review scan findings above manually.'],
         complianceNotes: '', overallVerdict: 'Manual review recommended.'
       });
+      setAiResult({
+  // ... your existing code ...
+});
+
+// ← ADD THIS RIGHT HERE
+if (data.riskLevel === 'Medium' || data.riskLevel === 'High' || data.riskLevel === 'Critical') {
+  const alertShown = sessionStorage.getItem(`alert_${data.domain}`);
+  if (!alertShown) {
+    sessionStorage.setItem(`alert_${data.domain}`, 'true');
+    setTimeout(() => {
+      alert(`⚠️ ${data.riskLevel} Risk Detected!\n\nDomain: ${data.domain}\nScore: ${data.score}/100\n\n${
+        data.riskLevel === 'Medium'
+          ? 'This domain has security issues that need attention.'
+          : 'This domain is HIGH RISK and has been automatically blocked!'
+      }`);
+    }, 500);
+  }
+}
     }
     setAiLoading(false);
   };
